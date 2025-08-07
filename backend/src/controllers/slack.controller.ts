@@ -32,12 +32,12 @@ export const slackCallback = async (req: Request, res: Response) => {
 
     if (error) {
         console.error('Slack OAuth error:', error);
-        console.log("slack oauth error found")
+        return res.redirect(`${process.env.FRONTEND_URL}/auth/failure?error=${error}`);
     }
 
     if (!code) {
         console.error('No authorization code received from Slack.');
-        console.log("no code details found")
+        return res.redirect(`${process.env.FRONTEND_URL}/auth/failure?error=no_code`);
     }
 
     try {
@@ -77,7 +77,7 @@ export const slackCallback = async (req: Request, res: Response) => {
 
             if (!team_id || !user_id) {
                 console.error('Missing required team_id or user_id from Slack OAuth response');
-                console.log('team id or user id not found');
+                return res.redirect(`${process.env.FRONTEND_URL}/auth/failure?error=invalid_response`);
             }
 
             const expiresAt = expires_in ? new Date(Date.now() + expires_in * 1000) : null;
@@ -105,13 +105,22 @@ export const slackCallback = async (req: Request, res: Response) => {
                 { upsert: true, new: true, setDefaultsOnInsert: true }
             );
 
-            console.log('Workspace saved or updated successfully:', workspace);
+            const frontendUrl =process.env.FRONTEND_URL
+
+            const redirectUrl = `${frontendUrl}/auth/success?` +
+                `teamId=${team_id}&` +
+                `teamName=${encodeURIComponent(team_name)}&` +
+                `botUserId=${bot_user_id}&` +
+                `userId=${user_id}`;
+
+            console.log(`Redirecting to: ${redirectUrl}`);
+            res.redirect(redirectUrl);
         } else {
             console.error('Slack OAuth access error:', data.error);
-            console.log('Error details:', data.error);
+            res.redirect(`${process.env.FRONTEND_URL}/auth/failure?error=${data.error}`);
         }
     } catch (error: any) {
         console.error('Error during Slack OAuth:', error.message);
-        console.log('Error details:', error);
+        res.redirect(`${process.env.FRONTEND_URL}/auth/failure?error=server_error`);
     }
 };
