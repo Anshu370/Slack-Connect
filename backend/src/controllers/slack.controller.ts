@@ -85,9 +85,9 @@ export const slackCallback = async (req: Request, res: Response) => {
 
 
             const workspace = await Workspace.findOneAndUpdate(
-                { team_id: team_id },
+                { teamId: team_id },
                 {
-                    team_name,
+                    teamName: team_name,
                     accessToken: access_token,
                     refreshToken: refresh_token,
                     expiresAt,
