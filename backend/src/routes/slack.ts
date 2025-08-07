@@ -7,7 +7,7 @@ dotenv.config();
 
 const router = Router();
 
-router.get('/slack', slackAuth);
+router.get('/auth', slackAuth);
        
 router.get('/oauth/callback', slackCallback);
 
