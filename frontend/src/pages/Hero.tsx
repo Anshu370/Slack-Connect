@@ -4,7 +4,13 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 
 function Hero() {
+  const [isConnecting, setIsConnecting] = useState(false);
 
+  const handleConnect = () => {
+    setIsConnecting(true);
+    // Redirect user to backend OAuth start route
+    window.location.href = `${import.meta.env.VITE_BACKEND_URL}/slack/auth`;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
