@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import axios from 'axios';
+import { encrypt, decrypt } from '../services/encryptDecrypt';
 
 // import Workspace Model
 import Workspace from '../models/workspace.model';
@@ -88,8 +89,8 @@ export const slackCallback = async (req: Request, res: Response) => {
                 { teamId: team_id },
                 {
                     teamName: team_name,
-                    accessToken: access_token,
-                    refreshToken: refresh_token,
+                    accessToken: encrypt(access_token),
+                    refreshToken: encrypt(refresh_token),
                     expiresAt,
                     scope,
                     userId: user_id,
@@ -99,13 +100,11 @@ export const slackCallback = async (req: Request, res: Response) => {
                     userAccessToken: user_access_token,
                     userRefreshToken: user_refresh_token,
                     userExpiresAt,
-                    lastRefreshed: new Date(),
-                    isActive: true
                 },
                 { upsert: true, new: true, setDefaultsOnInsert: true }
             );
 
-            const frontendUrl =process.env.FRONTEND_URL
+            const frontendUrl = process.env.FRONTEND_URL;
 
             const redirectUrl = `${frontendUrl}/auth/success?` +
                 `teamId=${team_id}&` +
