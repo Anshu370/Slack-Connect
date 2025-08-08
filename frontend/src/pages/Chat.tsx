@@ -77,7 +77,7 @@ function Chat() {
   const loadScheduledMessages = async (teamId: string, userId: string) => {
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/slack/chat/get-message`, {
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
