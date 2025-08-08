@@ -66,7 +66,7 @@ export const slackCallback = async (req: Request, res: Response) => {
         });
 
         const data = response.data;
-        console.log("Slack OAuth response:", data);
+        // console.log("Slack OAuth response:", data);
         if (data.ok) {
             const {
                 access_token,

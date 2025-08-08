@@ -1,4 +1,3 @@
-import React from 'react';
 import { Clock, Trash2, Hash } from 'lucide-react';
 import toast from 'react-hot-toast';
 
