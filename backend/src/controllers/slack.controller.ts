@@ -32,7 +32,7 @@ export const slackAuth = (req: Request, res: Response) => {
     const redirecturl = `https://slack.com/oauth/v2/authorize?` +
         `client_id=${process.env.SLACK_CLIENT_ID}&` +
         `scope=${encodeURIComponent(scopes)}&` +
-        `users_scopes=${encodeURIComponent(client_scope)}&` +
+        `user_scope=${encodeURIComponent(client_scope)}&` +
         `redirect_uri=${encodeURIComponent(process.env.SLACK_REDIRECT_URI || '')}&`;
 
     res.redirect(redirecturl);
