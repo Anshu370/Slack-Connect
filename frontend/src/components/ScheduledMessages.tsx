@@ -17,7 +17,7 @@ interface ScheduledMessagesProps {
 function ScheduledMessages({ scheduledMessages, onDeleteMessage }: ScheduledMessagesProps) {
   const handleDelete = async (messageId: string) => {
     try {
-      await onDeleteMessage(messageId);
+      onDeleteMessage(messageId);
       toast.success('Scheduled message deleted successfully!');
     } catch (error) {
       console.error('Failed to delete message:', error);

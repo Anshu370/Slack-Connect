@@ -65,7 +65,7 @@ export const deleteschedulemessage = async (req: Request, res: Response): Promis
     }
 
     try {
-        const result = await Message.deleteOne({ _id });
+        const result = await Message.deleteOne();
         if (result.deletedCount === 0) {
             return res.status(404).json({ error: "Message not found" });
         }
