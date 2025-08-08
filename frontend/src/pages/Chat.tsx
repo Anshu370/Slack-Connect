@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Send, Clock, LogOut, Hash, Lock } from 'lucide-react';
 import Cookies from 'js-cookie';
 import toast, { Toaster } from 'react-hot-toast';
+import axios from 'axios';
 import Header from '../components/Header';
 import ScheduledMessages from '../components/ScheduledMessages';
 
@@ -42,7 +43,6 @@ function Chat() {
 
     if (teamId && userId) {
       loadChannels(teamId);
-      loadScheduledMessages(teamId, userId);
     } else {
       setLoading(false);
       console.error('No team ID found in cookies');
@@ -63,6 +63,12 @@ function Chat() {
         if (data.channels && data.channels.length > 0) {
           setSelectedChannel(data.channels[0].id);
         }
+        
+        // Load scheduled messages after channels are loaded
+        const userId = Cookies.get('slack_user_id');
+        if (userId) {
+          loadScheduledMessages(teamId, userId);
+        }
       } else {
         console.error('Failed to load channels:', response.statusText);
       }
@@ -76,27 +82,14 @@ function Chat() {
   // Load scheduled messages from API
   const loadScheduledMessages = async (teamId: string, userId: string) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/slack/chat/get-message`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/slack/chat/get-message`, {
+        params: {
           teamId,
           userId
-        })
+        }
       });
       
-      if (response.ok) {
-        const data = await response.json();
-        const messagesWithChannelNames = data.messages.map((msg: any) => ({
-          ...msg,
-          channel: channels.find(c => c.id === msg.channel)?.name || msg.channel
-        }));
-        setScheduledMessages(messagesWithChannelNames);
-      } else {
-        console.error('Failed to load scheduled messages:', response.statusText);
-      }
+      setScheduledMessages(response.data.messages || []);
     } catch (error) {
       console.error('Error loading scheduled messages:', error);
     }
