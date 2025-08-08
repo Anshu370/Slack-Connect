@@ -1,9 +1,6 @@
-import e, { Router, Request, Response } from 'express';
-import dotenv from 'dotenv';
-import axios from 'axios';
+import e, { Router } from 'express';
 import { slackAuth, slackCallback } from '../controllers/slack.controller';
 
-dotenv.config();
 
 const router = Router();
 
