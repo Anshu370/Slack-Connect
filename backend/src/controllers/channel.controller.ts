@@ -6,7 +6,7 @@ import { decrypt } from '../services/encryptDecrypt';
 
 dotenv.config();
 
-
+// controller for retrieving all channels
 export const getChannels = async (req: Request, res: Response) => {
 
 

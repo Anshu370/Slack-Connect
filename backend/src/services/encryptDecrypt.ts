@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-
+// Encryption function
 export const encrypt = (text: string) => {
     const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(`${process.env.ENCRYPTION_KEY}`, 'hex'), iv);
@@ -12,6 +12,7 @@ export const encrypt = (text: string) => {
     return iv.toString('hex') + ':' + encrypted;
 };
 
+// Decryption function
 export const decrypt = (encryptedText: string) => {
     const [iv, encrypted] = encryptedText.split(':');
     const plainText = crypto.createDecipheriv('aes-256-cbc', Buffer.from(`${process.env.ENCRYPTION_KEY}`, 'hex'), Buffer.from(iv, 'hex'));

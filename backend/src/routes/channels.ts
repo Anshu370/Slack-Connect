@@ -4,6 +4,7 @@ import { tokenRotation } from '../middlewares/checkandrefreshToken';
 
 const router = Router();
 
+// Route for retrieving all channels (protected by token rotation middleware)
 router.get('/', tokenRotation, getChannels);
 
 

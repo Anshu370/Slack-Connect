@@ -7,7 +7,7 @@ export interface MessageInterface extends Document {
     text: string;
     scheduleTime: Date;
     userId: string; // Slack user ID of the sender
-    sent: boolean; // Whether the message has been sent
+    Status: String; // Whether the message has been sent
     ts: string; // Timestamp of the message
 }
 
@@ -18,7 +18,7 @@ const MessageSchema: Schema = new Schema({
     text: { type: String, required: true },
     scheduleTime: { type: Date, required: true },
     userId: { type: String },
-    sent: { type: Boolean, default: false },
+    status: { type: String, enum:['Pending', 'Done', 'Failed'], default:'Pending'},
     ts: { type: String }
 }, { timestamps: true }
 );

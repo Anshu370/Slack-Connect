@@ -5,6 +5,9 @@ import cors from 'cors';
 // Database configuration 
 import connectDB from './db';
 
+// Scheduler 
+import { checkAndSendScheduledMessages } from './schedule';
+
 // Routes 
 import slackRoutes from './routes/slack';
 import  channelRoutes  from './routes/channels';
@@ -26,12 +29,23 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-connectDB();
-
+// Routes
 app.use('/slack', slackRoutes);
 app.use('/api/slack/channels', channelRoutes);
 app.use('/api/slack/chat', chatRoutes);
 
-app.listen(PORT, () => {
-    console.log(`Server running on port http://localhost:${PORT}`);
-});
+(async () => {
+
+    // DB connection
+    await connectDB();
+
+    // Scheduler
+    setInterval(() => { 
+      checkAndSendScheduledMessages();
+    }, 60 * 1000);
+
+    
+    app.listen(PORT, () => {
+      console.log(`Server is running at http://localhost:${PORT}`);
+    });
+})();

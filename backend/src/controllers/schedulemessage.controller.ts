@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import Message from '../models/schedulemessage.model';
 
+
+// controller for scheduling a message
 export const scheduleMessage = async (req: Request, res: Response): Promise<Response> => {
 
     const { teamId, channel, text, scheduleTime } = req.body;
@@ -35,7 +37,7 @@ export const scheduleMessage = async (req: Request, res: Response): Promise<Resp
     }
 };
 
-
+// controller for retrieving scheduled messages
 export const getscheduleMessage = async (req: Request, res: Response): Promise<Response> => {
 
     const { teamId, userId } = req.query;
@@ -54,6 +56,7 @@ export const getscheduleMessage = async (req: Request, res: Response): Promise<R
     }
 };
 
+// controller for deleting a scheduled message
 export const deleteschedulemessage = async (req: Request, res: Response): Promise<Response> => {
     const { _id } = req.body;
 

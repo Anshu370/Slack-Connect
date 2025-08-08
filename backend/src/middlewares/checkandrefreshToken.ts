@@ -2,6 +2,7 @@ import axios from 'axios';
 import { Request, Response } from 'express';
 import { encrypt, decrypt } from '../services/encryptDecrypt';
 
+// Extends Express Request interface to include an optional 'workspace' property for storing workspace data during request processing
 declare global {
   namespace Express {
     interface Request {
@@ -13,6 +14,8 @@ declare global {
 // Import Database
 import Workspace from '../models/workspace.model';
 
+
+// Token rotation middleware
 export const tokenRotation = async (req: Request, res: Response, next: Function) => {
     try {
         const teamId = req.body?.teamId || req.query?.teamId;;

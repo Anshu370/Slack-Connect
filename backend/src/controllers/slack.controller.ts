@@ -8,6 +8,7 @@ import Workspace from '../models/workspace.model';
 
 dotenv.config();
 
+// controller for initiating Slack OAuth authentication
 export const slackAuth = (req: Request, res: Response) => {
     const scopes = [
         'channels:read',
@@ -39,6 +40,8 @@ export const slackAuth = (req: Request, res: Response) => {
     res.redirect(redirecturl);
 };
 
+
+// Controller for handling Slack OAuth callback
 export const slackCallback = async (req: Request, res: Response) => {
     const { code, error, state } = req.query;
 
@@ -103,14 +106,14 @@ export const slackCallback = async (req: Request, res: Response) => {
 
 
             const workspace = await Workspace.findOneAndUpdate(
-                { teamId: team_id },
+                { userId: user_id },
                 {
                     teamName: team_name,
                     accessToken: encrypt(access_token),
                     refreshToken: encrypt(refresh_token),
                     expiresAt,
                     scope,
-                    userId: user_id,
+                    teamId: team_id,
                     botUserId: bot_user_id,
                     appId: app_id,
                     enterpriseId: enterprise?.id || null,

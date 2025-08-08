@@ -19,13 +19,13 @@ export interface WorkspaceInterface extends Document {
 
 // Define the Mongoose schema for Workspace
 const WorkspaceSchema: Schema = new Schema({
-    teamId: { type: String, required: true, unique: true }, // Slack team ID, unique identifier for a workspace
+    userId: { type: String, required: true, unique:true }, // The Slack user ID who installed the app
+    teamId: { type: String, required: true, }, // Slack team ID, unique identifier for a workspace
     teamName: { type: String, required: true },
     accessToken: { type: String, required: true }, 
     refreshToken: { type: String },
     expiresAt: { type: Date },
     scope: { type: String, required: true }, // Scopes granted to the app
-    userId: { type: String, required: true }, // The Slack user ID who installed the app
     botUserId: { type: String }, // Bot user ID for the app
     appId: { type: String }, // Slack app ID
     enterpriseId: { type: String }, // Enterprise ID if applicable
