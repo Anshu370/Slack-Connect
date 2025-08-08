@@ -27,15 +27,17 @@ export const tokenRotation = async (req: Request, res: Response, next: Function)
         return res.status(404).json({ error: 'Workspace not found' });
         }
 
+        // 1st way to check expiration
         const now = new Date();
-        const expiresAt = new Date(`${workspace.expiresAt}`);
+        const expiresAt = new Date(`${workspace.userExpiresAt}`);
         const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
 
         let needsRefresh = expiresAt <= oneHourFromNow;
 
         if (!needsRefresh) {
         try {
-            const decryptedToken = decrypt(`${workspace.refreshToken}`);
+          // 2nd way to check expiration
+            const decryptedToken = decrypt(`${workspace.userRefreshToken}`);
             const authResp = await axios.post(
             'https://slack.com/api/auth.test',
             null,
@@ -58,7 +60,7 @@ export const tokenRotation = async (req: Request, res: Response, next: Function)
 
         if (needsRefresh) {
         try {
-            const decryptedToken = decrypt(`${workspace.refreshToken}`);
+            const decryptedToken = decrypt(`${workspace.userRefreshToken}`);
             const response = await axios.post('https://slack.com/api/oauth.v2.access',
             new URLSearchParams({
                 client_id: `${process.env.SLACK_CLIENT_ID}`,
@@ -75,8 +77,8 @@ export const tokenRotation = async (req: Request, res: Response, next: Function)
 
             if (data.ok) {
             const { access_token, expires_in } = data;
-            workspace.accessToken = encrypt(access_token);
-            workspace.expiresAt = new Date(Date.now() + expires_in * 1000);
+            workspace.userAccessToken = encrypt(access_token);
+            workspace.userExpiresAt = new Date(Date.now() + expires_in * 1000);
             await workspace.save();
             } else {
             console.error('Error refreshing token:', data.error);

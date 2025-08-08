@@ -113,8 +113,8 @@ export const slackCallback = async (req: Request, res: Response) => {
                     botUserId: bot_user_id,
                     appId: app_id,
                     enterpriseId: enterprise?.id || null,
-                    userAccessToken: user_access_token,
-                    userRefreshToken: user_refresh_token,
+                    userAccessToken: encrypt(user_access_token),
+                    userRefreshToken: encrypt(user_refresh_token),
                     userExpiresAt,
                 },
                 { upsert: true, new: true, setDefaultsOnInsert: true }
