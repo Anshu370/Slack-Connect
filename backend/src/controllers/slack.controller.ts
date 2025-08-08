@@ -20,9 +20,19 @@ export const slackAuth = (req: Request, res: Response) => {
         'im:history',
         'channels:join'
     ].join(',');
+    const client_scope = [
+        'channels:read',
+        'groups:read',
+        'im:read',
+        'mpim:read',
+        'users:read',
+        'chat:write',
+        'channels:history',
+        'im:history'].join(',');
     const redirecturl = `https://slack.com/oauth/v2/authorize?` +
         `client_id=${process.env.SLACK_CLIENT_ID}&` +
         `scope=${encodeURIComponent(scopes)}&` +
+        `users_scopes=${encodeURIComponent(client_scope)}&` +
         `redirect_uri=${encodeURIComponent(process.env.SLACK_REDIRECT_URI || '')}&`;
 
     res.redirect(redirecturl);
@@ -76,6 +86,7 @@ export const slackCallback = async (req: Request, res: Response) => {
             const user_refresh_token = authed_user?.refresh_token;
             const user_expires_in = authed_user?.expires_in;
 
+            
             if (!team_id || !user_id) {
                 console.error('Missing required team_id or user_id from Slack OAuth response');
                 return res.redirect(`${process.env.FRONTEND_URL}/auth/failure?error=invalid_response`);
