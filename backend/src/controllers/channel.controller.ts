@@ -12,7 +12,7 @@ export const getChannels = async (req: Request, res: Response) => {
 
     try {
         const decryptedToken = decrypt(`${req.workspace.accessToken}`);
-        console.log('Decrypted Token:', decryptedToken);
+        // console.log('Decrypted Token:', decryptedToken);
         const response = await axios.get('https://slack.com/api/conversations.list', {
             headers: {
                 'Authorization': `Bearer ${decryptedToken}`,

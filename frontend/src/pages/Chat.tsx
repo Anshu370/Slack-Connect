@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Send, Clock, LogOut, Hash, Lock } from 'lucide-react';
 import Cookies from 'js-cookie';
+import toast, { Toaster } from 'react-hot-toast';
 import Header from '../components/Header';
 import ScheduledMessages from '../components/ScheduledMessages';
 
@@ -12,43 +13,18 @@ interface Channel {
 }
 
 interface ScheduledMessage {
-  id: string;
+  _id: string;
   channel: string;
-  message: string;
-  scheduledTime: string;
-  status: 'pending' | 'sent' | 'failed';
+  text: string;
+  scheduleTime: string;
+  sent: boolean;
 }
-
-// Dummy scheduled messages data
-const dummyScheduledMessages: ScheduledMessage[] = [
-  {
-    id: '1',
-    channel: 'general',
-    message: 'Team meeting at 3 PM today!',
-    scheduledTime: '2025-01-27T15:00:00Z',
-    status: 'pending'
-  },
-  {
-    id: '2',
-    channel: 'development',
-    message: 'Code review session tomorrow morning',
-    scheduledTime: '2025-01-28T09:00:00Z',
-    status: 'pending'
-  },
-  {
-    id: '3',
-    channel: 'design-team',
-    message: 'New design mockups are ready for review',
-    scheduledTime: '2025-01-27T14:30:00Z',
-    status: 'pending'
-  }
-];
 
 function Chat() {
   const [channels, setChannels] = useState<Channel[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<string>('');
   const [message, setMessage] = useState('');
-  const [scheduledMessages, setScheduledMessages] = useState<ScheduledMessage[]>(dummyScheduledMessages);
+  const [scheduledMessages, setScheduledMessages] = useState<ScheduledMessage[]>([]);
   const [scheduleDateTime, setScheduleDateTime] = useState('');
   const [isScheduleMode, setIsScheduleMode] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -58,13 +34,15 @@ function Chat() {
   useEffect(() => {
     const teamName = Cookies.get('slack_team_name');
     const teamId = Cookies.get('slack_team_id');
+    const userId = Cookies.get('slack_user_id');
     
     if (teamName) {
       setWorkspaceName(teamName);
     }
 
-    if (teamId) {
+    if (teamId && userId) {
       loadChannels(teamId);
+      loadScheduledMessages(teamId, userId);
     } else {
       setLoading(false);
       console.error('No team ID found in cookies');
@@ -92,6 +70,35 @@ function Chat() {
       console.error('Error loading channels:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Load scheduled messages from API
+  const loadScheduledMessages = async (teamId: string, userId: string) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/slack/chat/get-message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          teamId,
+          userId
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const messagesWithChannelNames = data.messages.map((msg: any) => ({
+          ...msg,
+          channel: channels.find(c => c.id === msg.channel)?.name || msg.channel
+        }));
+        setScheduledMessages(messagesWithChannelNames);
+      } else {
+        console.error('Failed to load scheduled messages:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error loading scheduled messages:', error);
     }
   };
 
@@ -124,22 +131,45 @@ function Chat() {
   };
 
   const scheduleMessage = async (channelId: string, messageText: string, scheduledTime: string) => {
-    console.log('Scheduling message:', { channelId, messageText, scheduledTime });
-    // TODO: Replace with actual API call
-    const newMessage: ScheduledMessage = {
-      id: Date.now().toString(),
-      channel: channels.find(c => c.id === channelId)?.name || 'unknown',
-      message: messageText,
-      scheduledTime,
-      status: 'pending'
-    };
-    setScheduledMessages(prev => [...prev, newMessage]);
-    return new Promise(resolve => setTimeout(resolve, 1000));
+    const teamId = Cookies.get('slack_team_id');
+    if (!teamId) {
+      throw new Error('Team ID not found in cookies');
+    }
+
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/slack/chat/schedule-message`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        teamId,
+        channel: channelId,
+        text: messageText,
+        scheduleTime: scheduledTime
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    // Reload scheduled messages after successful scheduling
+    const userId = Cookies.get('slack_user_id');
+    if (userId) {
+      loadScheduledMessages(teamId, userId);
+    }
+    
+    return data;
   };
 
   const deleteScheduledMessage = async (messageId: string) => {
+    // TODO: Implement delete API when available
     console.log('Deleting scheduled message:', messageId);
-    setScheduledMessages(prev => prev.filter(msg => msg.id !== messageId));
+    setScheduledMessages(prev => prev.filter(msg => msg._id !== messageId));
+    toast.success('Scheduled message deleted successfully!');
     return new Promise(resolve => setTimeout(resolve, 500));
   };
 
@@ -150,11 +180,11 @@ function Chat() {
     try {
       const result = await sendInstantMessage(selectedChannel, message);
       setMessage('');
+      toast.success('Message sent successfully!');
       console.log('Message sent successfully!', result);
-      // You can add a success toast/notification here
     } catch (error) {
       console.error('Failed to send message:', error);
-      // You can add an error toast/notification here
+      toast.error('Failed to send message. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -163,14 +193,19 @@ function Chat() {
   const handleScheduleSend = async () => {
     if (!message.trim() || !selectedChannel || !scheduleDateTime) return;
     
+    setLoading(true);
     try {
       await scheduleMessage(selectedChannel, message, scheduleDateTime);
       setMessage('');
       setScheduleDateTime('');
       setIsScheduleMode(false);
+      toast.success('Message scheduled successfully!');
       console.log('Message scheduled successfully!');
     } catch (error) {
       console.error('Failed to schedule message:', error);
+      toast.error('Failed to schedule message. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -362,6 +397,7 @@ function Chat() {
           </div>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 }

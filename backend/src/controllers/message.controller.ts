@@ -9,7 +9,6 @@ interface InstantMessageBody {
     text: string;
 }
 
-
 interface WorkflowDataRequest extends Request {
     body: InstantMessageBody;
     workflowData?: {
@@ -35,7 +34,7 @@ export const instantMessage = async (req: WorkflowDataRequest, res: Response): P
         await web.conversations.join({ channel });
 
         const result = await web.chat.postMessage({ channel, text });
-
+        
         return res.status(200).json({
             message: "Message sent successfully",
             data: {
@@ -48,4 +47,4 @@ export const instantMessage = async (req: WorkflowDataRequest, res: Response): P
         console.error("Error sending message:", error);
         return res.status(500).json({ error: "Failed to send message" });
     }
-};
+}; 
