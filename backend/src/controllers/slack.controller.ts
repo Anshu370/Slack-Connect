@@ -85,8 +85,13 @@ export const slackCallback = async (req: Request, res: Response) => {
             const user_access_token = authed_user?.access_token;
             const user_refresh_token = authed_user?.refresh_token;
             const user_expires_in = authed_user?.expires_in;
-
             
+            console.log("team details", team_id);
+            console.log("author details", authed_user);
+            console.log("user access token", user_access_token);
+            console.log("user refresh token", user_refresh_token);
+            console.log("user expires in", user_expires_in);
+
             if (!team_id || !user_id) {
                 console.error('Missing required team_id or user_id from Slack OAuth response');
                 return res.redirect(`${process.env.FRONTEND_URL}/auth/failure?error=invalid_response`);
