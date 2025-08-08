@@ -28,6 +28,7 @@ export const slackAuth = (req: Request, res: Response) => {
         'users:read',
         'chat:write',
         'channels:history',
+        'channels:write',
         'im:history'].join(',');
     const redirecturl = `https://slack.com/oauth/v2/authorize?` +
         `client_id=${process.env.SLACK_CLIENT_ID}&` +
