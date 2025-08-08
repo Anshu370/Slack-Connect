@@ -8,6 +8,7 @@ import connectDB from './db';
 // Routes 
 import slackRoutes from './routes/slack';
 import  channelRoutes  from './routes/channels';
+import chatRoutes from './routes/chat';
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ connectDB();
 
 app.use('/slack', slackRoutes);
 app.use('/api/slack/channels', channelRoutes);
+app.use('/api/slack/chat', chatRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on port http://localhost:${PORT}`);

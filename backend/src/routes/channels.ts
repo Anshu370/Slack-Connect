@@ -1,4 +1,4 @@
-import e, { Router } from 'express';
+import { Router } from 'express';
 import { getChannels } from '../controllers/channel.controller';
 import { tokenRotation } from '../middlewares/checkandrefreshToken';
 

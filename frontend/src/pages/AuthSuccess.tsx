@@ -33,7 +33,7 @@ function AuthSuccess() {
   }, [searchParams]);
 
   const handleContinueToDashboard = () => {
-    // todo navigate
+    navigate('/chat');
   };
 
   return (
