@@ -37,7 +37,9 @@ export const scheduleMessage = async (req: Request, res: Response): Promise<Resp
 
 
 export const getscheduleMessage = async (req: Request, res: Response): Promise<Response> => {
-    const { teamId, userId } = req.params;
+
+    const { teamId, userId } = req.query;
+    console.log("Fetching scheduled messages for teamId:", teamId, "userId:", userId);
 
     if (!teamId || !userId) {
         return res.status(400).json({ error: "Team ID and User ID are required" });
