@@ -13,7 +13,7 @@ interface InstantMessageBody {
 interface WorkflowDataRequest extends Request {
     body: InstantMessageBody;
     workflowData?: {
-        accessToken: string;
+        userAccessToken: string;
     };
 }
 
@@ -25,11 +25,11 @@ export const instantMessage = async (req: WorkflowDataRequest, res: Response): P
     }
 
     try {
-        if (!req.workspace?.accessToken) {
+        if (!req.workspace?.userAccessToken) {
             return res.status(400).json({ error: "Access token not found in workspace" });
         }
 
-        const decryptedToken = decrypt(`${req.workspace.accessToken}`);
+        const decryptedToken = decrypt(`${req.workspace.userAccessToken}`);
         const web = new WebClient(decryptedToken);
 
         await web.conversations.join({ channel });
